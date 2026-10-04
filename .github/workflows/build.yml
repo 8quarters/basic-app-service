@@ -1,0 +1,90 @@
+name: Build Java JAR
+
+on:
+  push:
+    branches:
+      - main  # Adjust to the branch you want to trigger the build on
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    branches:
+      - main  # Adjust to the branch you want to trigger the build on
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Build with Maven
+      run: mvn clean package
+
+    - name: Create Git Tag
+      run: |
+        git config --global user.name "yuvarajengineer"
+        git config --global user.email  yuvarajengineer@gmail.com
+        git tag -a v${{ github.run_number }} -m "Release version ${{ github.run_number }}"
+        git push origin v${{ github.run_number }}
+
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      id: create_release
+      with:
+        tag_name: v${{ github.run_number }}
+        release_name: Release ${{ github.run_number }}
+        body: |
+          Automated release created by GitHub Actions.
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.YGITHUB_TOKEN }}
+
+    - name: Upload JAR artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: basic-app-service
+        path: target/*.jar  # Assumes Maven output is in the target directory
+
+    - name: Upload JAR artifact
+      if: always()
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: target/basic-app-service-0.0.1-SNAPSHOT.jar  # Path to your JAR file
+        asset_name: basic-app-service.jar
+        asset_content_type: application/java-archive
+      env:
+        GITHUB_TOKEN: ${{ secrets.YGITHUB_TOKEN }}
+      
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v2
+      with:
+        images: yuvarajengineer/basic-app-service
+      
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
