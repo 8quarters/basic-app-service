@@ -11,7 +11,9 @@ on:
       - main  # Adjust to the branch you want to trigger the build on
     paths-ignore:
       - '**.md'
-
+permissions:
+  contents: write
+  
 jobs:
   build:
     runs-on: ubuntu-latest
