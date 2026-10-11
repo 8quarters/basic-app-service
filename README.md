@@ -17,6 +17,31 @@ Config is 100% env vars: `DB_URL`, `DB_USER`, `DB_PASSWORD`, `PORT`.
 
 ## Local
 ```
+
+mvn clean package
+set DB_URL=
+set DB_USER=appuser
+set DB_PASSWORD=admin
+-- Create the user (or update password) with native password compatibility
+CREATE USER IF NOT EXISTS 'appuser'@'localhost' IDENTIFIED WITH caching_sha2_password BY 'admin';
+ALTER USER 'appuser'@'localhost' IDENTIFIED WITH caching_sha2_password BY 'admin';
+
+-- Grant privileges to your specific database (replace 'your_database_name')
+GRANT ALL PRIVILEGES ON labdb.* TO 'appuser'@'localhost';
+
+-- Apply the changes
+FLUSH PRIVILEGES;
+
+commit;
+
+C:\Program Files\MySQL\MySQL Server 9.5\bin>mysql -u appuser -p
+Enter password: *****
+mysql> show tables;
+
+cd target
+java -jar basic-app-service-0.0.1-SNAPSHOT.jar
+
+
 docker compose up --build
 curl localhost:8080/api/info
 curl -X POST localhost:8080/api/items -H 'Content-Type: application/json' -d '{"name":"hello"}'

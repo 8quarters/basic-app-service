@@ -2,7 +2,8 @@ server:
   port: ${PORT:8080}
 spring:
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/labdb?createDatabaseIfNotExist=true}
+    #url: ${DB_URL:jdbc:mysql://localhost:3306/labdb?createDatabaseIfNotExist=true}
+    url: ${DB_URL:jdbc:mysql://localhost:3306/labdb?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true}
     username: ${DB_USER:root}
     password: ${DB_PASSWORD:root}
     hikari:
@@ -15,4 +16,3 @@ spring:
 management:
   endpoints.web.exposure.include: health,info
   endpoint.health.probes.enabled: true
-
