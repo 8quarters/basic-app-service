@@ -46,6 +46,9 @@ docker compose up --build
 curl localhost:8080/api/info
 curl -X POST localhost:8080/api/items -H 'Content-Type: application/json' -d '{"name":"hello"}'
 curl "localhost:8080/api/cpu/burn?seconds=10&threads=2"
+http://localhost:8080/api/items/4
+http://localhost:8080/api/items
+
 ```
 
 ## EC2
